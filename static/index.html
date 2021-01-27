@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fuck</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.6/vue.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.0/index.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.0/theme-chalk/index.css" rel="stylesheet">
+    <style>
+        #head {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="head">
+        <el-avatar :size="100" src="[[.head_img]]"></el-avatar>
+        <h5 style="margin: 0">[[.nick_name]]</h5>
+        <h6 style="margin: 5px">[[.signature]]</h6>
+        <div style="display: flex">
+            <el-input v-model="offset" style="width:100px" placeholder="进度"></el-input>
+        </div>
+        <br>
+        <el-button type="primary" @click="getMp">Start</el-button>
+        <el-divider></el-divider>
+        <el-table
+                show-summary
+                :data="tableData"
+                style="width: 100%">
+            <el-table-column
+                    prop="title"
+                    label="标题"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="author"
+                    label="作者"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="read_nums"
+                    label="阅读量">
+            </el-table-column>
+            <el-table-column
+                    prop="like_nums"
+                    label="在看">
+            </el-table-column>
+            <el-table-column
+                    prop="good_nums"
+                    label="点赞">
+            </el-table-column>
+            <el-table-column
+                    prop="write_self"
+                    label="原创">
+                <!--                <template slot-scope="scope">-->
+                <!--                    {{scope.row.write_self}}-->
+                <!--                </template>-->
+            </el-table-column>
+            <el-table-column
+                    prop="contain_video"
+                    label="包含视频">
+                <!--                <template slot-scope="scope">-->
+                <!--                    {{scope.row.contain_video}}-->
+                <!--                </template>-->
+            </el-table-column>
+            <el-table-column
+                    prop="contain_audio"
+                    label="包含音频">
+                <!--                <template slot-scope="scope">-->
+                <!--                    {{scope.row.contain_audio}}-->
+                <!--                </template>-->
+            </el-table-column>
+            <el-table-column
+                    prop="create_time"
+                    label="创建时间">
+            </el-table-column>
+        </el-table>
+    </div>
+</div>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                msg: "El",
+                record: {},
+                offset: 0,
+                count: 1,
+                tableData: [
+                    //     {
+                    //     author: '2016-05-02',
+                    //     title: '王小虎',
+                    //     read_nums: '0',
+                    //     like_nums:'0',
+                    //     good_nums:'0',
+                    //     write_self:false,
+                    //     contain_video:false,
+                    //     contain_audio:false,
+                    //     create_time:''
+                    // },
+                ]
+            }
+        }, methods: {
+            getMp() {
+                $.get("/mp", {offset: this.offset, count: this.count}, (data) => {
+                    let tmp = []
+                    for (let i = 0; data != null && i < data.length; i++) {
+                        data[i].write_self = Number(data[i].write_self)
+                        data[i].contain_video = Number(data[i].contain_video)
+                        data[i].contain_audio = Number(data[i].contain_audio)
+                        let key = data[i].title + data[i].create_time
+                        console.log(key)
+                        if (this.record[key] == undefined) {
+                            tmp.push(data[i])
+                            this.record[key] = true
+                        }
+                    }
+                    //this.tableData = data.concat(this.tableData)
+                    if (tmp != null) {
+                        this.tableData = this.tableData.concat(tmp)
+                        this.offset = this.offset + this.count
+                        this.$set(this, 'tableData', this.tableData)
+                        this.$set(this, 'offset', this.offset)
+                    }
+                    if (tmp.length == 0) {
+                        alert("Finish")
+                        return
+                    }
+                    setTimeout(() => {
+                        this.getMp()
+                    }, 1000)
+                })
+
+            }
+        }
+    })
+</script>
+</body>
+</html>
